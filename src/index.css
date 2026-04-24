@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-app: #f1f5f9;
+  --color-sidebar-bg: #0f172a;
+  --color-accent: #2563eb;
+  --color-text-main: #1e293b;
+  --color-text-muted: #64748b;
+  --color-border-base: #e2e8f0;
+  
+  --radius-card: 12px;
+  --radius-btn: 8px;
+}
+
+body {
+  @apply bg-bg-app text-text-main font-sans;
+}

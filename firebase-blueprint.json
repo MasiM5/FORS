@@ -1,0 +1,94 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "System user with role-based access control",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "school_admin", "clerk"] },
+        "schoolId": { "type": "string", "description": "ID of the school assigned to (null for global admins)" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "email", "role"]
+    },
+    "School": {
+      "title": "School",
+      "description": "Primary schools in Lusangazi District",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "code": { "type": "string", "description": "Unique school code" },
+        "location": { "type": "string" },
+        "district": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "code"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Form One registered student",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "pupilId": { "type": "string", "description": "Auto-generated unique PupilID" },
+        "gender": { "type": "string", "enum": ["Male", "Female"] },
+        "dob": { "type": "string", "format": "date" },
+        "enrollmentYear": { "type": "integer" },
+        "schoolId": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "archived"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "pupilId", "gender", "dob", "enrollmentYear", "schoolId"]
+    },
+    "Guardian": {
+      "title": "Guardian",
+      "description": "Guardian linked to a student",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "relationship": { "type": "string" },
+        "studentId": { "type": "string" }
+      },
+      "required": ["name", "phone", "relationship", "studentId"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "Tracking system actions",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "action", "timestamp"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and roles"
+    },
+    "schools/{schoolId}": {
+      "schema": "School",
+      "description": "School registry"
+    },
+    "students/{studentId}": {
+      "schema": "Student",
+      "description": "Student enrollment records"
+    },
+    "students/{studentId}/guardians/{guardianId}": {
+      "schema": "Guardian",
+      "description": "Guardians linked to a student"
+    },
+    "audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "System activity logs"
+    }
+  }
+}

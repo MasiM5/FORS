@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'steven.mwale23@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+
+    function isClerk(schoolId) {
+      return isSignedIn() && (
+        request.auth.token.email == 'steven.mwale23@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == schoolId
+        ))
+      );
+    }
+
+    match /users/{userId} {
+      // Avoid recursion by using request.auth.uid directly
+      allow read: if isSignedIn() && (request.auth.uid == userId || request.auth.token.email == 'steven.mwale23@gmail.com');
+      allow create, update: if isSignedIn() && (request.auth.uid == userId || request.auth.token.email == 'steven.mwale23@gmail.com');
+    }
+
+    match /schools/{schoolId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /students/{studentId} {
+      allow read: if isSignedIn() && (
+        request.auth.token.email == 'steven.mwale23@gmail.com' || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.schoolId == resource.data.schoolId
+        ))
+      );
+      allow create: if isClerk(request.resource.data.schoolId);
+      allow update: if isClerk(resource.data.schoolId);
+      allow delete: if isAdmin();
+    }
+
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+    }
+  }
+}
